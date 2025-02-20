@@ -27,8 +27,7 @@ jobs:
         cache-dependency-path: ./package-lock.json
     - name: npm install and build
       run: |
-        npm install esbuild
-        npm i
+        npm i --force
         npx ng build --configuration production --source-map false --aot true --optimization true --base-href /${{ github.event.repository.name }}/app/
     - name: Copy dist to webserver static
       run: |

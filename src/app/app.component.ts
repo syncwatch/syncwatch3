@@ -1,13 +1,26 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { FileService } from './shared/file/file.service';
+import { IndexeddbService } from './shared/indexeddb/indexeddb.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  providers: [
+    FileService,
+    IndexeddbService,
+  ]
 })
 export class AppComponent {
-  title = 'syncwatch3';
+  constructor(private fileService: FileService, private indexeddbService: IndexeddbService) {
+
+  }
+
+  selectMediaFile() {
+    this.fileService.loadFile('mp4').subscribe(file => {
+      console.log(file);
+      this.indexeddbService.saveMedia(file);
+    });
+  }
 }

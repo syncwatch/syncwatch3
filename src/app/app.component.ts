@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FileService } from './shared/file/file.service';
-import { IndexeddbService } from './shared/indexeddb/indexeddb.service';
+import { IndexeddbService, IndexedDBStorage, MEDIA_DATA_TYPE } from './shared/indexeddb/indexeddb.service';
+import { FileSizePipe } from './shared/file/file-size.pipe';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,10 @@ import { IndexeddbService } from './shared/indexeddb/indexeddb.service';
   styleUrl: './app.component.css',
   providers: [
     FileService,
-    IndexeddbService,
+    IndexeddbService
+  ],
+  imports: [
+    FileSizePipe
   ]
 })
 export class AppComponent {
@@ -17,10 +21,31 @@ export class AppComponent {
 
   }
 
+  ngOnInit() {
+    this.refreshStats();
+  }
+
+  indexedDBStorage?: IndexedDBStorage;
+  mediaList?: MEDIA_DATA_TYPE[];
+  refreshingStats = true;
+
+  async refreshStats() {
+    this.indexedDBStorage = await this.indexeddbService.getIndexedDBStorage();
+    this.mediaList = await this.indexeddbService.getAllMedia();
+    this.refreshingStats = false;
+  }
+
   selectMediaFile() {
+    this.refreshingStats = true;
     this.fileService.loadFile('mp4').subscribe(file => {
       console.log(file);
-      this.indexeddbService.saveMedia(file);
+      // TODO: check collision
+      this.indexeddbService.saveMedia(file).then(() => this.refreshStats());
     });
+  }
+
+  deleteMedia(media: MEDIA_DATA_TYPE) {
+    this.refreshingStats = true;
+    this.indexeddbService.deleteMedia(media).then(() => this.refreshStats());
   }
 }
